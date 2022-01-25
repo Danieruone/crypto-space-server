@@ -14,6 +14,17 @@ let verifyToken = (req, res, next) => {
   });
 };
 
+let verifyOptionalToken = (req, res, next) => {
+  let token = req.get("Authorization");
+  jwt.verify(token, process.env.TOKEN_SEED, (err, decoded) => {
+    if (err) {
+      return next();
+    }
+    req.user = decoded.user;
+    next();
+  });
+};
+
 let verifyAdminRole = (req, res, next) => {
   let user = req.user;
   if (user.role === "ADMIN_ROLE") {
@@ -28,4 +39,4 @@ let verifyAdminRole = (req, res, next) => {
   }
 };
 
-module.exports = { verifyToken, verifyAdminRole };
+module.exports = { verifyToken, verifyAdminRole, verifyOptionalToken };
