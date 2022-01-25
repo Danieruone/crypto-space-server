@@ -82,42 +82,44 @@ app.get("/cryptocurrencies/list", [verifyToken], function (req, res) {
 app.post("/currency", [verifyToken], function (req, res) {
   let body = req.body;
 
-  Currency.findOne({ alias: body.alias }).exec((err, currency) => {
-    if (err) {
-      return res.status(400).json({
-        ok: false,
-        err,
-      });
-    }
-
-    if (!currency) {
-      let currency = new Currency({
-        user_id: req?.user?._id,
-        name: body.name,
-        alias: body.alias,
-        enabled: body.enabled,
-      });
-
-      currency.save((err, currencyDB) => {
-        if (err) {
-          return res.status(400).json({
-            ok: false,
-            err,
-          });
-        }
-        res.json({
-          ok: true,
-          currency: currencyDB,
+  Currency.findOne({ alias: body.alias, user_id: req.user._id }).exec(
+    (err, currency) => {
+      if (err) {
+        return res.status(400).json({
+          ok: false,
+          err,
         });
-      });
-    } else {
-      return res.status(400).json({
-        ok: false,
-        err: { message: "Currency already exists" },
-        currency,
-      });
+      }
+
+      if (!currency) {
+        let currency = new Currency({
+          user_id: req?.user?._id,
+          name: body.name,
+          alias: body.alias,
+          enabled: body.enabled,
+        });
+
+        currency.save((err, currencyDB) => {
+          if (err) {
+            return res.status(400).json({
+              ok: false,
+              err,
+            });
+          }
+          res.json({
+            ok: true,
+            currency: currencyDB,
+          });
+        });
+      } else {
+        return res.status(400).json({
+          ok: false,
+          err: { message: "Currency already exists" },
+          currency,
+        });
+      }
     }
-  });
+  );
 });
 
 app.put("/currency/:id", [verifyToken], function (req, res) {
