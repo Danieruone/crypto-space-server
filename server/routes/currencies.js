@@ -18,7 +18,6 @@ app.get(
   function (req, res) {
     const params = req.query;
     const user_id = req?.user?._id;
-    console.log(req.user);
     getCurrenciesListFromCMC({
       start: params.start,
       limit: params.limit,
@@ -61,7 +60,6 @@ app.get(
 );
 
 app.get("/cryptocurrencies/list", [verifyToken], function (req, res) {
-  console.log(req.user);
   Currency.find({ user_id: req.user._id }, "user_id name alias enabled").exec(
     (err, currencies) => {
       if (err) {
@@ -94,7 +92,7 @@ app.post("/currency", [verifyToken], function (req, res) {
 
     if (!currency) {
       let currency = new Currency({
-        user_id: body.user_id,
+        user_id: req?.user?._id,
         name: body.name,
         alias: body.alias,
         enabled: body.enabled,
